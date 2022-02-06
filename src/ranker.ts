@@ -1,12 +1,15 @@
-const uniq = require('lodash/uniq');
+import uniq from 'lodash/uniq';
 
-module.exports = {
-  WordleRanker: function WordleRanker(words) {
+const ALPHABET = 'abcdefghijklmnopqrstuvqxyz';
+
+export class Ranker {
+  rank(words: string[], excludeLetters: string[]) {
+    const includeLetters = ALPHABET.split('').filter(
+      (letter: string) => !excludeLetters.includes(letter)
+    );
+
     const scores = [];
-    const excludeLetters = 'arsblodfght'.split('');
-    const includeLetters = 'ceni'.split('');
 
-    // let words = data.split("\n");
     const YELLOW_POINTS = 1;
     const GREEN_POINTS = 10;
 
@@ -15,19 +18,20 @@ module.exports = {
       const total = [];
 
       words.forEach((otherWord) => {
-        const score = [0, 0, 0, 0, 0];
         if (word === otherWord) {
           return;
         }
 
+        const score = [0, 0, 0, 0, 0];
+
         const otherLetters = otherWord.split('');
 
-        // processing greens
+        // processing yellow
         letters.forEach((l, i) => {
           if (
-            otherWord.includes(l)
-            && !excludeLetters.includes(otherWord[i])
-            && includeLetters.includes(otherWord[i])
+            otherWord.includes(l) &&
+            !excludeLetters.includes(otherWord[i]) &&
+            includeLetters.includes(otherWord[i])
           ) {
             score[i] = YELLOW_POINTS;
           }
@@ -36,9 +40,9 @@ module.exports = {
         // processing greens
         letters.forEach((l, i) => {
           if (
-            l === otherLetters[i]
-            && !excludeLetters.includes(otherWord[i])
-            && includeLetters.includes(otherWord[i])
+            l === otherLetters[i] &&
+            !excludeLetters.includes(otherWord[i]) &&
+            includeLetters.includes(otherWord[i])
           ) {
             score[i] = GREEN_POINTS;
           }
@@ -57,5 +61,5 @@ module.exports = {
     const sortedScores = scores.sort((a, b) => b.average - a.average);
 
     return sortedScores;
-  },
-};
+  }
+}
