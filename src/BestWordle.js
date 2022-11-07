@@ -6,7 +6,6 @@ module.exports = {
     const excludeLetters = 'arsblodfght'.split('');
     const includeLetters = 'ceni'.split('');
 
-    // let words = data.split("\n");
     const YELLOW_POINTS = 1;
     const GREEN_POINTS = 10;
 
@@ -22,8 +21,8 @@ module.exports = {
 
         const otherLetters = otherWord.split('');
 
-        // processing greens
         letters.forEach((l, i) => {
+          // processing yellows
           if (
             otherWord.includes(l)
             && !excludeLetters.includes(otherWord[i])
@@ -31,10 +30,8 @@ module.exports = {
           ) {
             score[i] = YELLOW_POINTS;
           }
-        });
 
-        // processing greens
-        letters.forEach((l, i) => {
+          // processing greens
           if (
             l === otherLetters[i]
             && !excludeLetters.includes(otherWord[i])

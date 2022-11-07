@@ -8,6 +8,10 @@ class Wordle {
     this.word = word;
   }
 
+  getWord() {
+    return this.word;
+  }
+
   getLetters() {
     return this.word.split('');
   }
@@ -16,10 +20,10 @@ class Wordle {
     return this.word.includes(l);
   }
 
-  hasPositionalMatch(posistionalMatchers) {
+  hasPositionalMatch(positionalMatchers) {
     const letters = this.getLetters();
 
-    return posistionalMatchers.every((match) => letters[match[0]] === match[1]);
+    return positionalMatchers.every(({ index, letter }) => letters[index] === letter);
   }
 }
 
@@ -30,14 +34,16 @@ fs.readFile(wordsLargePath, 'utf8', (err, data) => {
     throw err;
   }
 
-  const words = data.split('\n');
   const greenMatches = [];
-  const yellowMatches = [];
   const guessedLettersMatching = [];
   const guessedLettersNonMatching = [];
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+  const words = data.split('\n');
+  const guesses = [];
+
+  for (;;) {
+    const yellowMatches = [];
+
     const word = readline.question('Wordle word? ');
     const info = readline.question('Wordle info (y/g/0): ');
 
@@ -45,32 +51,52 @@ fs.readFile(wordsLargePath, 'utf8', (err, data) => {
     console.log(word, info);
     const wordles = words.map((w) => new Wordle(w));
 
-    word.split('').forEach((l, i) => {
-      switch (info[i]) {
+    word.split('').forEach((letter, index) => {
+      switch (info[index]) {
         case 'y':
-          yellowMatches.push([i, l]);
-          guessedLettersMatching.push(l);
+          yellowMatches.push({
+            letter,
+            index,
+          });
+          guessedLettersMatching.push({
+            letter,
+            index,
+          });
           break;
         case 'g':
-          greenMatches.push([i, l]);
-          guessedLettersMatching.push(l);
+          greenMatches.push({
+            letter,
+            index,
+          });
+          guessedLettersMatching.push({
+            letter,
+            index,
+          });
           break;
         case '0':
-          guessedLettersNonMatching.push(l);
+          guessedLettersNonMatching.push({
+            letter,
+            index,
+          });
           break;
         default:
       }
     });
 
     const filteredWordles = wordles
-      .filter((wordle) => !guessedLettersNonMatching.some((l) => wordle.hasLetter(l)))
-      .filter((wordle) => guessedLettersMatching.every((l) => wordle.hasLetter(l)))
-      .filter((wordle) => wordle.hasPositionalMatch(greenMatches))
-      .filter((wordle) => !wordle.hasPositionalMatch(yellowMatches));
+      .filter((wordle) => !guessedLettersNonMatching.some(({ letter }) => wordle.hasLetter(letter))
+      && guessedLettersMatching.every(({ letter }) => wordle.hasLetter(letter))
+      && wordle.hasPositionalMatch(greenMatches)
+      && !wordle.hasPositionalMatch(yellowMatches)
+      && !guesses.includes(wordle.getWord()));
 
-    const rankedWordles = WordleRanker(filteredWordles.map((w) => w.word));
+    const rankedWordles = WordleRanker(
+      filteredWordles.map(({ word: filteredWord }) => filteredWord),
+    );
 
     // eslint-disable-next-line no-console
     console.log(rankedWordles.slice(0, 10));
+
+    guesses.push(word);
   }
 });
