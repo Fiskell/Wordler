@@ -34,11 +34,10 @@ fs.readFile(wordsLargePath, 'utf8', (err, data) => {
     throw err;
   }
 
+  const words = data.split('\n');
   const greenMatches = [];
   const guessedLettersMatching = [];
   const guessedLettersNonMatching = [];
-
-  const words = data.split('\n');
   const guesses = [];
 
   for (;;) {
